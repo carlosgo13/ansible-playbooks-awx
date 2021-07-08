@@ -162,7 +162,8 @@
           tower_credential:
             organization: "{{ organization.name }}"
             name: "{{ credential.name }}"
-            kind: "{{ credential.kind }}"
+            kind: "{{ credential.kind | default(omit) }}"
+            credential_type: "{{ credential.credential_type | default(omit) }}"
             state: absent
           vars:
             organization: "{{ item.0 }}"
@@ -216,7 +217,7 @@
           tower_credential:
             organization: "{{ organization.name }}"
             name: "{{ credential.name }}"
-            kind: "{{ credential.kind }}"
+            kind: "{{ credential.kind | default(omit) }}"
             state: present
             become_password: "{{ credential.become_password | default(omit) }}"
             become_username: "{{ credential.become_username | default(omit) }}"
@@ -228,6 +229,8 @@
             team: "{{ credential.team | default(omit) }}"
             username: "{{ credential.username | default(omit) }}"
             vault_password: "{{ credential.vault_password | default(omit) }}"
+            credential_type: "{{ credential.credential_type | default(omit) }}"
+            inputs: "{{ credential.inputs | default(omit) }}"
           vars:
             organization: "{{ item.0 }}"
             credential: "{{ item.1 }}"
