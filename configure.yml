@@ -279,7 +279,7 @@
           loop: "{{ awx_organizations | subelements('credentials', skip_missing='yes') }}"
           when:
             - organization.state | default('present') == 'present' and credential.state | default('present') == 'present'
-            - credential.kind == 'vault'
+            - "'kind' in credential and credential.kind == 'vault'"
             - "'vault_id' in credential"
           no_log: "{{ awx_nolog }}"
           tags:
