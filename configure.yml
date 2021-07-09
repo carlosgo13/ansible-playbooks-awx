@@ -242,6 +242,21 @@
           tags:
             - credentials
 
+        - name: associate galaxy credentials to organizations
+          tower_organization:
+            name: "{{ organization.name }}"
+            galaxy_credentials: "{{ organization.galaxy_credentials }}"
+            state: present
+          vars:
+            organization: "{{ item }}"
+          loop_control:
+            label: "{{ organization.name }}"
+          loop: "{{ awx_organizations | list }}"
+          when:
+            - organization.state | default('present') == 'present'
+            - "'galaxy_credentials' in organization"
+          no_log: "{{ awx_nolog }}"
+
         - name: query credentials
           uri:
             url: "{{ awx_local_url }}/api/v2/credentials/?page_size=100"
