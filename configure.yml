@@ -268,7 +268,7 @@
 
         - name: create awx instance groups
           tower_instance_group:
-            name: "{{ galaxy_credential.name }}"
+            name: "{{ instance_group.name }}"
             is_container_group: "{{ instance_group.container_group | default('omit') }}"
             pod_spec_override: "{{ instance_group.pod_spec_override | default('omit') }}"
             state: present
