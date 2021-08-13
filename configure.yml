@@ -185,6 +185,7 @@
           tower_credential:
             organization: "{{ organization.name }}"
             name: "{{ galaxy_credential.name }}"
+            credential_type: "{{ galaxy_credential.credential_type }}"
             state: absent
           vars:
             organization: "{{ item.0 }}"
@@ -266,6 +267,25 @@
           tags:
             - galaxy_credentials
 
+        - name: associate awx galaxy credentials
+          tower_organization:
+            name: "{{ organization.name }}"
+            galaxy_credentials: "{{ galaxy_credentials_target }}"
+            state: present
+          vars:
+            organization: "{{ item }}"
+            galaxy_credentials_absent: "{{ organization.galaxy_credentials | rejectattr('state', 'undefined') | rejectattr('state', 'equalto', 'present') | map(attribute='name') | list }}"
+            galaxy_credentials_all: "{{ organization.galaxy_credentials | map(attribute='name') | list }}"
+            galaxy_credentials_target: "{{ galaxy_credentials_all | difference(galaxy_credentials_absent) }}"
+          loop_control:
+            label: "{{ organization.name }}"
+          loop: "{{ awx_organizations | list }}"
+          when:
+            - organization.state | default('present') == 'present'
+            - galaxy_credentials_target | length > 0
+          tags:
+            - galaxy_credentials
+
         - name: create awx instance groups
           tower_instance_group:
             name: "{{ instance_group.name }}"
@@ -283,22 +303,23 @@
           tags:
             - instance_groups
 
-        - name: associate awx galaxy credentials and instance groups
+        - name: associate awx instance groups
           tower_organization:
             name: "{{ organization.name }}"
-            galaxy_credentials: "{{ galaxy_credentials }}"
-            instance_groups: "{{ instance_groups }}"
+            instance_groups: "{{ instance_groups_target }}"
             state: present
           vars:
             organization: "{{ item }}"
-            instance_groups: "{{ organization.instance_groups | map(attribute='name') | list }}"
-            galaxy_credentials: "{{ organization.galaxy_credentials | map(attribute='name') | list }}"
+            instance_groups_absent: "{{ organization.instance_groups | rejectattr('state', 'undefined') | rejectattr('state', 'equalto', 'present') | map(attribute='name') | list }}"
+            instance_groups_all: "{{ organization.instance_groups | map(attribute='name') | list }}"
+            instance_groups_target: "{{ instance_groups_all | difference(instance_groups_absent) }}"
           loop_control:
             label: "{{ organization.name }}"
           loop: "{{ awx_organizations | list }}"
-          when: item.state | default('present') == 'present'
+          when:
+            - organization.state | default('present') == 'present'
+            - instance_groups_target | length > 0
           tags:
-            - galaxy_credentials
             - instance_groups
 
         - name: create awx credentials
